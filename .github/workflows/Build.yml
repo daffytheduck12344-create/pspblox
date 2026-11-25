@@ -1,0 +1,31 @@
+name: Build PSPBlox
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: pspdev/pspdev:latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build PSPBlox
+        run: |
+          export PSPSDK=/opt/pspdev/pspsdk
+          make
+
+      - name: Upload PSPBlox package
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: PSPBlox
+          path: |
+            EBOOT.PBP
+            PARAM.SFO
+          if-no-files-found: warn
