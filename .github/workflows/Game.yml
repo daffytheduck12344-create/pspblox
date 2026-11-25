@@ -1,1 +1,43 @@
+name: Build PSPBlox
 
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: pspdev/pspdev:latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set PSPSDK path
+        shell: bash
+        run: |
+          set -e
+          if [ -f /opt/pspdev/pspsdk/lib/build.mak ]; then
+            PSPSDK=/opt/pspdev/pspsdk
+          elif [ -f /usr/local/pspdev/pspsdk/lib/build.mak ]; then
+            PSPSDK=/usr/local/pspdev/pspsdk
+          else
+            PSPSDK="$(dirname "$(dirname "$(find / -path '*/pspsdk/lib/build.mak' -print -quit)")")"
+          fi
+          echo "PSPSDK=$PSPSDK" >> "$GITHUB_ENV"
+          echo "$PSPSDK/bin" >> "$GITHUB_PATH"
+
+      - name: Build PSPBlox
+        run: make
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: PSPBlox
+          path: |
+            EBOOT.PBP
+            PARAM.SFO
+          if-no-files-found: warn
