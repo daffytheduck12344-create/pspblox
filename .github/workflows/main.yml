@@ -1,0 +1,23 @@
+name: Build PSPBlox
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: pspdev/pspdev:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build PSPBlox
+        run: make
+      - name: Upload EBOOT.PBP
+        uses: actions/upload-artifact@v4
+        with:
+          name: PSPBlox
+          path: |
+            EBOOT.PBP
+            PARAM.SFO
